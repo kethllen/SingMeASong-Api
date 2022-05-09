@@ -1,197 +1,184 @@
-// import { recommendationService } from '../../src/services/recommendationsService.js';
-// import { recommendationRepository } from '../../src/repositories/recommendationRepository.js';
-// import {createRecommendation} from "../factories/recommendationBodyFactory.js";
-// import { createManyRecommendation } from '../factories/recommendationsBodyManyFactory.js';
-// import { faker } from '@faker-js/faker';
-// import { jest } from '@jest/globals';
-// import { prisma } from "../../src/database.js";
+import { recommendationService } from '../../src/services/recommendationsService.js';
+import { recommendationRepository } from '../../src/repositories/recommendationRepository.js';
+import {createRecommendation} from "../factories/recommendationBodyFactory.js";
+import { createManyRecommendation } from '../factories/recommendationsBodyManyFactory.js';
+import { faker } from '@faker-js/faker';
+import { jest } from '@jest/globals';
+import { prisma } from "../../src/database.js";
+import { createRecommendationData } from '../factories/recommendationDataFactory.js';
 
-// async function disconnect(){
-//   await prisma.$disconnect();
-// }
-// async function truncateRecommendations(){
-//   await prisma.$executeRaw`TRUNCATE TABLE recommendations;`;
-// }
+async function disconnect(){
+  await prisma.$disconnect();
+}
+async function truncateRecommendations(){
+ await prisma.$executeRaw`TRUNCATE TABLE recommendations RESTART IDENTITY CASCADE;`;
+
+}
+
+describe('unit - test /RecommendationService', () => {
+  beforeEach(truncateRecommendations);
+
+  afterAll(disconnect);
+  jest.clearAllMocks();
+  jest.resetAllMocks();
+  it('should conflict create recommendation is found', async () => {
+    const body= createRecommendationData();
+    const body2 = {name: body.name, youtubeLink: body.youtubeLink, score: body.score}
+    await recommendationService.insert(body2);
+
+    jest.spyOn(recommendationRepository, "findByName").mockResolvedValue({ ...body });
+    jest.spyOn(recommendationRepository, 'create').mockResolvedValue();
+    expect(async () => {
+      await recommendationService.insert(body2);
+    }).rejects.toEqual({ message: 'Recommendations names must be unique', type: 'conflict' });
+
+	  });
 
 
-// describe('unit - test /RecommendationService', () => {
-//   beforeEach(truncateRecommendations);
-
-//   afterAll(disconnect);
-//   it('should conflict create recommendation is found', async () => {
-//     const body= createManyRecommendation();
-
-//     await recommendationService.insert(body[0]);
-
-//     //jest.spyOn(recommendationRepository, "findByName").mockResolvedValue(body[0]);
-
-//     expect(async () => {
-// 			await recommendationService.insert(body[0]);
-// 		}).rejects.toEqual({ message: 'Recommendations names must be unique', type: 'conflict' });
-
-// 	  });
-
-
-//     it('should valid  create recommendation is found', async () => {
-//       const body = createRecommendation();
+    it('should valid  create recommendation is found', async () => {
+      const body= createRecommendation();
   
-//     //  jest.spyOn(recommendationRepository, "findByName").mockResolvedValue(body.name);
+     jest.spyOn(recommendationRepository, "findByName").mockResolvedValue(null);
   
      
-//       const insertRepository=jest.spyOn(recommendationRepository, "create").mockResolvedValue(null);
+      const insertRepository=jest.spyOn(recommendationRepository, "create").mockResolvedValue(null);
       
-//       await recommendationService.insert(body);
+      await recommendationService.insert(body);
 
-//       expect( insertRepository).toBeCalledTimes(1);
-//       expect( insertRepository).toBeCalledWith(body);
-//     });
+      expect( insertRepository).toBeCalledTimes(1);
+      expect( insertRepository).toBeCalledWith(body);
+    });
+  });
+  describe('unit - test /RecommendationService/upvote', () => {
+    beforeEach(truncateRecommendations);
 
-//     it('should not found recommendation upvote', async () => {
+  afterAll(disconnect);
+  jest.clearAllMocks();
+  jest.resetAllMocks();
+    it('should not found recommendation upvote', async () => {
 
-//       jest.spyOn(recommendationRepository, 'find').mockResolvedValue(null);
+      jest.spyOn(recommendationRepository, 'find').mockResolvedValue(null);
   
-//       expect(async () => {
-//         await recommendationService.upvote(1);
-//       }).rejects.toEqual({ message: '', type: 'not_found' });
-//     });
+      expect(async () => {
+        await recommendationService.upvote(1);
+      }).rejects.toEqual({ message: '', type: 'not_found' });
+    });
+  });
+  describe('unit - test /RecommendationService/downvote ', () => {
+    beforeEach(truncateRecommendations);
+
+  afterAll(disconnect);
+  jest.clearAllMocks();
+  jest.resetAllMocks();
+    it('should not found ', async () => {
+      jest.spyOn(recommendationRepository, 'find').mockResolvedValue(null);
   
-//     it('should not found recommendation downvote', async () => {
-//       jest.spyOn(recommendationRepository, 'find').mockResolvedValue(null);
-  
-//       expect(async () => {
-//         await recommendationService.downvote(1);
-//       }).rejects.toEqual({ message: '', type: 'not_found' });
-//     });
+      expect(async () => {
+        await recommendationService.downvote(1);
+      }).rejects.toEqual({ message: '', type: 'not_found' });
+    });
+  });
 
-//     it('should remove recommendation downvote', async () => {
+  describe('unit - test /RecommendationService/downvote', () => {
+    beforeEach(truncateRecommendations);
 
-//     const recommendation = {
-//       id: 1,
-//       name: faker.name.findName(),
-//       youtubeLink: faker.internet.url(),
-//       score: -5
-//     };
-//       jest.spyOn(recommendationRepository, 'find').mockResolvedValue(recommendation);
+  afterAll(disconnect);
+  jest.clearAllMocks();
+  jest.resetAllMocks();
+    it('should remove', async () => {
 
-//       const downvoteRepository =jest.spyOn(recommendationRepository, 'updateScore').mockResolvedValue({ ...recommendation, score: -6 });
+    const recommendation = createRecommendationData();
+      jest.spyOn(recommendationRepository, 'find').mockResolvedValue(recommendation);
+
+      const downvoteRepository = jest.spyOn(recommendationRepository, 'updateScore').mockResolvedValue({ ...recommendation, score: -6 });
       
-//       const remove = jest
-//       .spyOn(recommendationRepository, 'remove')
-//       .mockResolvedValue(null);
+      const remove = jest
+      .spyOn(recommendationRepository, 'remove')
+      .mockResolvedValue(null);
   
-//       await recommendationService.downvote(1);
+      await recommendationService.downvote(1);
   
-//       expect(remove).toHaveBeenCalledTimes(1);
-//     });
-//     it('should recommendation downvote', async () => {
+      expect(remove).toHaveBeenCalledTimes(1);
+    });
+   
+  });
+  describe('unit - test /RecommendationService/upvote', () => {
+    beforeEach(truncateRecommendations);
 
-//       const recommendation = {
-//         id: 1,
-//         name: faker.name.findName(),
-//         youtubeLink: faker.internet.url(),
-//         score: 10
-//       };
-//         jest.spyOn(recommendationRepository, 'find').mockResolvedValue(recommendation);
-  
-//         const downvoteRepository =jest.spyOn(recommendationRepository, 'updateScore').mockResolvedValue({ ...recommendation, score: 9 });
-        
-//         const remove = jest.spyOn(recommendationRepository, 'remove').mockResolvedValue(null);
-    
-//         await recommendationService.downvote(1);
-    
-//         expect(downvoteRepository).toBeCalledWith(1, 'decrement');
-//         expect(remove).toBeCalledTimes(0);
-//       });
-      
-//       it('should recommendation upvote', async () => {
+  afterAll(disconnect);
+  jest.clearAllMocks();
+  jest.resetAllMocks();
+      it('should valid recommendation upvote', async () => {
 
-//         const recommendation = {
-//           id: 1,
-//           name: faker.name.findName(),
-//           youtubeLink: faker.internet.url(),
-//           score: 10
-//         };
-//           jest.spyOn(recommendationRepository, 'find').mockResolvedValue(recommendation);
+        const recommendation = {
+          id: 1,
+          name: faker.name.findName(),
+          youtubeLink: faker.internet.url(),
+          score: 10
+        };
+          jest.spyOn(recommendationRepository, 'find').mockResolvedValue(recommendation);
     
-//           const upvoteRepository  =jest.spyOn(recommendationRepository, 'updateScore').mockResolvedValue({ ...recommendation, score: 11 });
+          const upvoteRepository  =jest.spyOn(recommendationRepository, 'updateScore').mockResolvedValue({ ...recommendation, score: 11 });
           
       
-//           await recommendationService.downvote(1);
+          await recommendationService.upvote(1);
       
-//           expect(upvoteRepository).toBeCalledWith(1, "increment");
-//           expect(upvoteRepository).toBeCalledTimes(1);
-//         });
-      
-        
-// 	      it('should not found recommendation getRandom', async () => {
-//             const random = 0.8;
+          expect(upvoteRepository).toBeCalledWith(1, "increment");
+        });
+  });
+  describe('unit - test /RecommendationService/getRandom', () => {
+    beforeEach(truncateRecommendations);
 
-//             jest.spyOn(recommendationService, 'getScoreFilter').mockReturnValue('lte');
-//             jest.spyOn(recommendationService, 'getByScore').mockResolvedValue([]);
-//             jest.spyOn(recommendationRepository, 'findAll').mockResolvedValue([]);
+  afterAll(disconnect);
 
-//             expect(async () => {
-//               await recommendationService.getRandom();
-//             }).rejects.toEqual({ message: '', type: 'not_found' });
-//           });
-//           it('should recommendation getRandom', async () => {
-//             const random = 0.2;
-        
-//             const recommendations = createManyRecommendation();
+	     it('should not found recommendation getRandom', async () => {
+            const random = 0.8;
 
-//             await prisma.recommendation.createMany({
-//               data: [ { ...recommendations[0]}, { ...recommendations[1] }, { ...recommendations[2] }, { ...recommendations[3] },{ ...recommendations[4] },{ ...recommendations[5] }, { ...recommendations[6] }, { ...recommendations[7] }, { ...recommendations[8] }, { ...recommendations[9] }]
-//             });
-        
-//             jest.spyOn(recommendationService, 'getScoreFilter').mockReturnValueOnce('gt');
-//             jest.spyOn(recommendationRepository, 'findAll').mockResolvedValue([]);
-        
-//             await recommendationService.getRandom();
-        
-//             expect(recommendationRepository.findAll).toBeCalledTimes(1);
-//           });
-//         it('should return lte if value is higher than 0.7 getScoreFilter', async () => {
-//             const result = recommendationService.getScoreFilter(0.8);
-        
-//             expect(result).toBe('lte');
-//           });
-        
-//         it('should return gt if value is lower than 0.7 getScoreFilter', async () => {
-//           const result = recommendationService.getScoreFilter(0.6);
-        
-//           expect(result).toBe('gt');
-//       });
+            jest.spyOn(recommendationService, 'getScoreFilter').mockReturnValue('lte');
+            jest.spyOn(recommendationService, 'getByScore').mockResolvedValue([]);
+            jest.spyOn(recommendationRepository, 'findAll').mockResolvedValue([]);
 
-//         it('should findAll if filtered return no recommendations getByScore', async () => {
-//           jest.spyOn(recommendationRepository, 'findAll').mockResolvedValue([]);
-      
-//           const result = jest
-//             .spyOn(recommendationRepository, 'findAll')
-//             .mockResolvedValue([]);
-      
-//           await recommendationService.getByScore('gt');
-      
-//           expect(result).toHaveBeenCalledTimes(2);
-//         });
-      
-//       it('should findAll filtered with valid scoreFilter GT getByScore', async () => {
-//           const result = jest
-//             .spyOn(recommendationRepository, 'findAll');
-      
-//           await recommendationService.getByScore('gt');
-      
-//           expect(result).toBeCalledWith({ score: 10, scoreFilter: 'gt' });
-//         });
-      
+            expect(async () => {
+              await recommendationService.getRandom();
+            }).rejects.toEqual({ message: '', type: 'not_found' });
+          });
+    });
 
-//         it('should findAll filtered with valid scoreFilter lte getByScore', async () => {
-//           const result = jest
-//             .spyOn(recommendationRepository, 'findAll');
-      
-//           await recommendationService.getByScore('lte');
-      
-//           expect(result).toBeCalledWith({ score: 10, scoreFilter: 'lte' });
-//         });
+    describe('unit - test /RecommendationService/getByScore', () => {
+      beforeEach(truncateRecommendations);
 
-//   });
+  afterAll(disconnect);
+  jest.clearAllMocks();
+  jest.resetAllMocks();
+      it('should return recommendations', async () => {
+        const recommendation = createRecommendationData();
+
+        jest.spyOn(recommendationRepository, 'findAll').mockResolvedValue([recommendation]);
+    
+        const result = await recommendationService.getByScore('gt');
+    
+        expect(result).toEqual([]);
+      });
+    
+    });
+    // describe('unit - test /RecommendationService/getScoreFilter', () => {
+    //   beforeEach(truncateRecommendations);
+
+    //   afterAll(disconnect);
+    //   jest.clearAllMocks();
+    //   jest.resetAllMocks();
+    //   it('should return lte if value is higher than 0.7', async () => {
+    //     const result = recommendationService.getScoreFilter(0.8);
+    
+    //     expect(result).toBe('lte');
+    //   });
+    
+    //   it('should return gt if value is lower than 0.7', async () => {
+    //     const result = recommendationService.getScoreFilter(0.6);
+    
+    //     expect(result).toBe('gt');
+    //   });
+    // });
+
+ 
 

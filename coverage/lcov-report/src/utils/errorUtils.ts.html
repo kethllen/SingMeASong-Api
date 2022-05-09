@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">72.72% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>7/14</span>
+                <span class='fraction'>8/11</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">20% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/20</span>
+                <span class='fraction'>10/15</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>3/6</span>
+                <span class='fraction'>5/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">60% </span>
+                <span class="strong">87.5% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/10</span>
+                <span class='fraction'>7/8</span>
             </div>
         
             
@@ -109,21 +109,21 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -142,22 +142,22 @@ export function isAppError(error: object): error is AppError {
 export function errorTypeToStatusCode(type: AppErrorTypes) {
   <span class="missing-if-branch" title="if path not taken" >I</span>if (type === "conflict") <span class="cstat-no" title="statement not covered" >return 409;</span>
   <span class="missing-if-branch" title="if path not taken" >I</span>if (type === "not_found") <span class="cstat-no" title="statement not covered" >return 404;</span>
-  <span class="missing-if-branch" title="if path not taken" >I</span>if (type === "unauthorized") <span class="cstat-no" title="statement not covered" >return 401;</span>
+ // if (type === "unauthorized") return 401;
   if (type === "wrong_schema") return 422;
 <span class="cstat-no" title="statement not covered" >  return 400;</span>
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >conflictError(</span>message?: string): AppError {
-<span class="cstat-no" title="statement not covered" >  return { type: "conflict", message: message ?? "" };</span>
+export function conflictError(message?: string): AppError {
+  return { type: "conflict", message: message ?? <span class="branch-1 cbranch-no" title="branch not covered" >"" </span>};
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >notFoundError(</span>message?: string): AppError {
-<span class="cstat-no" title="statement not covered" >  return { type: "not_found", message: message ?? "" };</span>
+export function notFoundError(message?: string): AppError {
+  return { type: "not_found", message: <span class="branch-0 cbranch-no" title="branch not covered" >message </span>?? "" };
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >unauthorizedError(</span>message?: string): AppError {
-<span class="cstat-no" title="statement not covered" >  return { type: "unauthorized", message: message ?? "" };</span>
-}
+// export function unauthorizedError(message?: string): AppError {
+//   return { type: "unauthorized", message: message ?? "" };
+// }
 &nbsp;
 export function wrongSchemaError(message?: string): AppError {
   return { type: "wrong_schema", message: <span class="branch-0 cbranch-no" title="branch not covered" >message </span>?? "" };
@@ -169,7 +169,7 @@ export function wrongSchemaError(message?: string): AppError {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at Mon May 09 2022 10:08:49 GMT-0300 (Horário Padrão de Brasília)
+                at Mon May 09 2022 12:55:34 GMT-0300 (Horário Padrão de Brasília)
             </div>
         <script src="../../prettify.js"></script>
         <script>

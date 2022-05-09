@@ -75,11 +75,14 @@ async function getByScore(scoreFilter: "gt" | "lte") {
 }
 
 function getScoreFilter(random: number) {
+  console.log(random);
   if (random < 0.7) {
     return "gt";
   }
-
-  return "lte";
+  else{
+    return "lte";
+  }
+  
 }
 
 export const recommendationService = {

@@ -18,12 +18,12 @@ export function createManyRecommendation () {
     {
       name: "Joga de ladinho",
       youtubeLink: "https://www.youtube.com/watch?v=LU2DgybGXfM",
-      score: -5,
+      score: -3,
     },
     {
       name: "Um bom malandro",
       youtubeLink: "https://www.youtube.com/watch?v=LU2DgybGXfM",
-      score: -5,
+      score: -3,
     },
     {
       name: "tem nada haver",

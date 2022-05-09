@@ -186,3 +186,37 @@ describe("POST /:id/downvote", () => {
 });
 });
 
+describe("DELETE /delete", () => {
+  beforeEach(truncateRecommendations);
+
+  afterAll(disconnect);
+  it("given a valid music get by id should return 200", async ()=>{
+    const recommendations = createManyRecommendation();
+		await prisma.recommendation.createMany({
+			data: recommendations
+		});
+
+    const result = await supertest(app).delete(`/recommendations/delete`);
+    const status = result.status;
+		
+		const test = 	await prisma.recommendation.findMany();
+    expect(status).toBe(200);
+    expect(test.length).toEqual(0);
+});
+});
+describe("POST /seed", () => {
+  beforeEach(truncateRecommendations);
+
+  afterAll(disconnect);
+  it("given a valid music get by id should return 200", async ()=>{
+    const recommendations = createManyRecommendation();
+		
+
+    const result = await supertest(app).post(`/recommendations/seed`).send(recommendations);
+    const status = result.status;
+		
+		const test = 	await prisma.recommendation.findMany();
+    expect(status).toBe(200);
+    expect(test.length).toEqual(10);
+});
+});

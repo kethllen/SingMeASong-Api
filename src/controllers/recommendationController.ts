@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { recommendationSchema } from "../schemas/recommendationsSchemas.js";
 import { recommendationService } from "../services/recommendationsService.js";
 import { wrongSchemaError } from "../utils/errorUtils.js";
+import { deleteAll } from "../services/testService.js"
 
 async function insert(req: Request, res: Response) {
   const validation = recommendationSchema.validate(req.body);
@@ -55,6 +56,10 @@ async function getById(req: Request, res: Response) {
   res.send(recommendation);
 }
 
+// async function deleteAll(req: Request, res: Response) {
+//   await deleteAll();
+//   res.sendStatus(200);
+// }
 export const recommendationController = {
   insert,
   upvote,
@@ -63,4 +68,5 @@ export const recommendationController = {
   getTop,
   get,
   getById,
+  deleteAll
 };

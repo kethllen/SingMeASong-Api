@@ -80,7 +80,7 @@ Você escontrará as rotas desta API disponiveis no diretorio routers dentro de 
 
 * [JEST](https://jestjs.io/)
 * [Eslint](https://eslint.org/) 
-* [Prettier](https://www.npmjs.com/package/prettier) - Usada para gerar RSS
+* [Prettier](https://www.npmjs.com/package/prettier) 
 
 
 

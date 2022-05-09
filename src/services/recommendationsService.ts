@@ -16,7 +16,7 @@ async function insert(createRecommendationData: CreateRecommendationData) {
 
 async function upvote(id: number) {
   await getByIdOrFail(id);
-
+ 
   await recommendationRepository.updateScore(id, "increment");
 }
 

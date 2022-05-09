@@ -9,7 +9,7 @@ async function disconnect(){
   await prisma.$disconnect();
 }
 async function truncateRecommendations(){
-  await prisma.$executeRaw`TRUNCATE TABLE recommendations;`;
+  await prisma.$executeRaw`TRUNCATE TABLE recommendations RESTART IDENTITY CASCADE;`;
 }
 
 describe("POST /",() => {
@@ -23,6 +23,30 @@ describe("POST /",() => {
    
     const status = result.status;
     expect(status).toEqual(201);
+});
+it("should return 422 given an unnamed body", async () => {
+	const body =  createRecommendation();
+
+	const response = await supertest(app).post("/recommendations").send({
+		youtubeLink: body.youtubeLink,
+	});
+	expect(response.status).toEqual(422);
+});
+
+it("should return 422 given a body with no youtubeLink", async () => {
+	const body =  createRecommendation();
+
+	const response = await supertest(app).post("/recommendations").send({
+		name: body.name,
+	});
+	expect(response.status).toEqual(422);
+});
+
+it("should return 422 empty body", async () => {
+	const body = {};
+
+	const response = await supertest(app).post("/recommendations").send(body);
+	expect(response.status).toEqual(422);
 });
 });
 
@@ -53,7 +77,7 @@ describe("GET /random", () => {
     const recommendations = createManyRecommendation();
 
     await prisma.recommendation.createMany({
-			data: [ { ...recommendations[0]}, { ...recommendations[1] }, { ...recommendations[2] }, { ...recommendations[3] },{ ...recommendations[4] },{ ...recommendations[5] }, { ...recommendations[6] }, { ...recommendations[7] }, { ...recommendations[8] }, { ...recommendations[9] }]
+			data: recommendations
 		});
 
     const result = await supertest(app).get("/recommendations/random");
@@ -61,7 +85,7 @@ describe("GET /random", () => {
     const status = result.status;
 
     expect(status).toEqual(200);
-    expect(result.body.length).toBe(1);
+    
 });
 });
 
@@ -73,7 +97,7 @@ describe("GET /top/:amount",() => {
     const recommendations = createManyRecommendation();
 
     await prisma.recommendation.createMany({
-			data: [ { ...recommendations[0]}, { ...recommendations[1] }, { ...recommendations[2] }, { ...recommendations[3] },{ ...recommendations[4] },{ ...recommendations[5] }, { ...recommendations[6] }, { ...recommendations[7] }, { ...recommendations[8] }, { ...recommendations[9] }]
+			data: recommendations
 		});
     
     const amount = faker.datatype.number({ min: 2, max: 5 });
@@ -94,16 +118,17 @@ describe("GET /:id", () => {
   it("given a valid music get by id should return 200", async ()=>{
     const recommendations = createManyRecommendation();
 
-    await prisma.recommendation.createMany({
-			data: [ { ...recommendations[0]}, { ...recommendations[1] }, { ...recommendations[2] }, { ...recommendations[3] },{ ...recommendations[4] },{ ...recommendations[5] }, { ...recommendations[6] }, { ...recommendations[7] }, { ...recommendations[8] }, { ...recommendations[9] }]
+       await prisma.recommendation.createMany({
+			data: recommendations
 		});
-
+			const test = await prisma.recommendation.findMany();
+		
     const id = faker.datatype.number({ min: 1, max: 9 });
+		
     const result  = await supertest(app).get(`/recommendations/${id}`);
 
     const status = result.status;
     expect(status).toEqual(200);
-    expect(result.body.length).toBe(1);
 });
 });
 
@@ -114,20 +139,23 @@ describe("POST /:id/upvote", () => {
   it("given a valid music get by id should return 200", async ()=>{
     const recommendations = createManyRecommendation();
 
-    await prisma.recommendation.createMany({
-			data: [ { ...recommendations[0]}, { ...recommendations[1] }, { ...recommendations[2] }, { ...recommendations[3] },{ ...recommendations[4] },{ ...recommendations[5] }, { ...recommendations[6] }, { ...recommendations[7] }, { ...recommendations[8] }, { ...recommendations[9] }]
+		await prisma.recommendation.createMany({
+			data: recommendations
 		});
     const id = faker.datatype.number({ min: 1, max: 9 });
     const test  = await prisma.recommendation.findUnique({
       where: { id },
     });
 
-    const result = await supertest(app).get(`/recommendations/${id}/upvote`);
+    const result = await supertest(app).post(`/recommendations/${id}/upvote`);
     const status = result.status;
+		const test2  = await prisma.recommendation.findUnique({
+      where: { id },
+    });
+
 
     expect(status).toBe(200);
-    expect(result.body.length).toBe(1);
-    expect(result.body.score).toBeGreaterThan(test.score);
+    expect(test2.score).toBeGreaterThan(test.score);
 
 });
 });
@@ -138,8 +166,8 @@ describe("POST /:id/downvote", () => {
   afterAll(disconnect);
   it("given a valid music get by id should return 200", async ()=>{
     const recommendations = createManyRecommendation();
-    await prisma.recommendation.createMany({
-			data: [ { ...recommendations[0]}, { ...recommendations[1] }, { ...recommendations[2] }, { ...recommendations[3] },{ ...recommendations[4] },{ ...recommendations[5] }, { ...recommendations[6] }, { ...recommendations[7] }, { ...recommendations[8] }, { ...recommendations[9] }]
+		await prisma.recommendation.createMany({
+			data: recommendations
 		});
 
     const id = faker.datatype.number({ min: 1, max: 9 });
@@ -147,12 +175,13 @@ describe("POST /:id/downvote", () => {
       where: { id },
     });
 
-    const result = await supertest(app).get(`/recommendations/${id}/downvote`);
+    const result = await supertest(app).post(`/recommendations/${id}/downvote`);
     const status = result.status;
-
+		const test2  = await prisma.recommendation.findUnique({
+      where: { id },
+    });
     expect(status).toBe(200);
-    expect(result.body.length).toBe(1);
-    expect(result.body.score).toBeLessThan(test.score);
+    expect(test2.score).toBeLessThan(test.score);
 
 });
 });

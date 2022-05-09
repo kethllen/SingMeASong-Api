@@ -50,7 +50,6 @@ NODE_ENV=test
 
 ## ⚙️ Executando os testes
 
-Explicar como executar os testes automatizados para este sistema.
 
 ### 🔩 Analise os testes de ponta a ponta
 

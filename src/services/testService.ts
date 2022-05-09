@@ -1,5 +1,14 @@
-import truncate  from "../repositories/testsRepository.js"; 
+import { testsRepository } from "../repositories/testsRepository.js"
 
-export async function deleteAll() {
-  await truncate();
+
+async function deleteAll() {
+  await testsRepository.truncate();
 }
+async function seed(body) {
+  await testsRepository.seed(body);
+}
+
+export const testsService ={
+  deleteAll,
+  seed
+};
